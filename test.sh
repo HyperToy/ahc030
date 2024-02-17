@@ -3,7 +3,7 @@
 cargo build
 cd tools/
 
-case_default=20
+case_default=1
 if [ $# -eq 0 ]; then
     echo "No arguments provided, using default value: $DEFAULT_VALUE"
     case=$case_default

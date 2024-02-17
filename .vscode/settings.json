@@ -4,7 +4,9 @@
         "atcoder",
         "Deque",
         "itertools",
-        "proconio"
+        "proconio",
+        "rngs",
+        "Seedable"
     ],
     "audioCues.lineHasError": "off",
     "audioCues.diffLineModified": "off",

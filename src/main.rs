@@ -3,6 +3,7 @@
 
 use itertools::Itertools;
 use proconio::{input, source::line::LineSource};
+use rand::Rng;
 use std::{
     collections::{HashSet, VecDeque},
     io::{stdin, BufRead, BufReader},
@@ -38,59 +39,71 @@ fn main() {
         .map(|oil_field| oil_field.size)
         .sum::<usize>();
 
+    let seed = 334;
+    let mut rng: rand::rngs::StdRng = rand::SeedableRng::seed_from_u64(seed);
+
     let mut count = 0;
     let mut has_oil = HashSet::new();
     let mut seen = vec![vec![false; N]; N];
     let mut queue = VecDeque::new();
-    'outer: for i in 0..N {
-        for j in 0..N {
+
+    let mut remain = N * N * 2;
+    'outer: loop {
+        let i = rng.gen_range(0..N);
+        let j = rng.gen_range(0..N);
+        // eprintln!("({}, {})", i, j);
+        if seen[i][j] {
+            continue;
+        }
+        seen[i][j] = true;
+
+        if remain == 1 {
+            break;
+        }
+        let res = query1(Point(i as i32, j as i32), &mut source);
+        remain -= 1;
+        // eprintln!("outer: {}", res);
+        if res == 0 {
+            continue;
+        }
+        count += res;
+        has_oil.insert((i, j));
+        if count == oil_count {
+            break 'outer;
+        }
+
+        queue.push_back((i, j));
+        while !queue.is_empty() {
+            let &(i, j) = queue.front().unwrap();
             // eprintln!("({}, {})", i, j);
-            if seen[i][j] {
-                continue;
-            }
-            seen[i][j] = true;
-
-            let res = query1(Point(i as i32, j as i32), &mut source);
-            // eprintln!("outer: {}", res);
-            if res == 0 {
-                continue;
-            }
-            count += res;
-            has_oil.insert((i, j));
-            if count == oil_count {
-                break 'outer;
-            }
-
-            queue.push_back((i, j));
-            while !queue.is_empty() {
-                let &(i, j) = queue.front().unwrap();
-                // eprintln!("({}, {})", i, j);
-                queue.pop_front();
-                for k in 0..4 {
-                    let ni = i as isize + DX[k];
-                    let nj = j as isize + DY[k];
-                    if ni < 0 || N as isize <= ni || nj < 0 || N as isize <= nj {
-                        continue;
-                    }
-                    let ni = ni as usize;
-                    let nj = nj as usize;
-                    if seen[ni][nj] {
-                        continue;
-                    }
-                    seen[ni][nj] = true;
-
-                    let res = query1(Point(ni as i32, nj as i32), &mut source);
-                    // eprintln!("inner: {}", res);
-                    if res == 0 {
-                        continue;
-                    }
-                    count += res;
-                    has_oil.insert((ni, nj));
-                    if count == oil_count {
-                        break 'outer;
-                    }
-                    queue.push_back((ni, nj));
+            queue.pop_front();
+            for k in 0..4 {
+                let ni = i as isize + DX[k];
+                let nj = j as isize + DY[k];
+                if ni < 0 || N as isize <= ni || nj < 0 || N as isize <= nj {
+                    continue;
                 }
+                let ni = ni as usize;
+                let nj = nj as usize;
+                if seen[ni][nj] {
+                    continue;
+                }
+                seen[ni][nj] = true;
+                if remain == 1 {
+                    break 'outer;
+                }
+                let res = query1(Point(ni as i32, nj as i32), &mut source);
+                remain -= 1;
+                // eprintln!("inner: {}", res);
+                if res == 0 {
+                    continue;
+                }
+                count += res;
+                has_oil.insert((ni, nj));
+                if count == oil_count {
+                    break 'outer;
+                }
+                queue.push_back((ni, nj));
             }
         }
     }
