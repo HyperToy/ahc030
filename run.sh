@@ -7,14 +7,21 @@ cargo build -r
 
 case_default=50
 if [ $# -eq 0 ]; then
-    # echo "No arguments provided, using default value: $case_default"
-    case=$case_default
+    case_count=$case_default
 else
-    case=$1
+    case_count=$1
 fi
-((loop_stop = $case - 1))
 
-echo $case > score.txt
+((loop_stop = $case_count - 1))
+
+
+echo $case_count > score.txt
+
+need=in/$(printf "%04d\n" "${loop_stop}").txt
+if [ ! -e $need ]; then
+    seq -f '%04g' 0 $loop_stop > seeds.txt
+    ./target/release/gen seeds.txt
+fi
 
 for i in `seq -f '%04g' 0 $loop_stop`
 do
