@@ -19,15 +19,18 @@ echo $case_count > score.txt
 
 need=in/$(printf "%04d\n" "${loop_stop}").txt
 if [ ! -e $need ]; then
+    echo "generating inputs"
     seq -f '%04g' 0 $loop_stop > seeds.txt
     ./target/release/gen seeds.txt
 fi
 
 for i in `seq -f '%04g' 0 $loop_stop`
 do
-    ./target/release/tester ../target/release/ahc030 < in/$i.txt > out/$i.txt 2>> score.txt
-    ./target/release/vis  in/$i.txt out/$i.txt > /dev/null && mv vis.html vis/$i.html
+    echo $i
+    ./target/release/tester ../target/release/ahc030 < in/$i.txt > out/$i.txt 
+    ./target/release/vis  in/$i.txt out/$i.txt >> score.txt && mv vis.html vis/$i.html
 done
+echo "execution done"
 
 cd ..
 scores=scores.txt
